@@ -48,7 +48,7 @@ bot.on("message", message => {
                 if(message.author.id == "117154757818187783") {
                     dbexec(message.content.substring(message.content.indexOf(" ")), message.channel, true); 
                 } else {
-                    msg.channel.send("```\nError: Unauthorized\n```");
+                    message.channel.send("```\nError: Unauthorized\n```");
                 }
                 break;
             case "quote":

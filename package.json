@@ -1,0 +1,12 @@
+{
+  "name": "Ancillary-Bot",
+  "version": "1.0.0",
+  "description": "A discord bot for the udub server",
+  "main": "bot.js",
+  "author": "wbigelow",
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "mysql": "^2.15.0",
+    "winston": "^2.4.0"
+  }
+}

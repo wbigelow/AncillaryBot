@@ -103,7 +103,7 @@ function quote(message) {
         logger.info("author:" + author);
         dbexec("SELECT * FROM Quotes WHERE Author = '" + author + "';", message.channel, true);
     } else if(modifier === "delete") {
-        dbexec("DELETE FROM Quotes WHERE ID='"+ quote +"';", channelID, false);
+        dbexec("DELETE FROM Quotes WHERE ID='"+ quote +"';", message.channel, false);
     } else if(modifier === "random") {
         dbexec("SELECT * FROM Quotes ORDER BY RAND() LIMIT 1;", message.channel, true);
     } else {

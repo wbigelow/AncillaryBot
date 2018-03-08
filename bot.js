@@ -40,7 +40,7 @@ bot.on("ready", function (evt) {
 });
 
 bot.on("message", message => {
-    if (message.content.substring(0, 1) == '>') {
+    if (message.content.substring(0, 1) == '>' && !message.author.bot) {
         logger.info(message.content);
         let cmd = message.content.substring(1, message.content.indexOf(" "));
         switch(cmd) {

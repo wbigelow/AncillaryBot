@@ -21,7 +21,7 @@ bot.login(auth.token);
 let con;
 function handleDisconnect() {
     con = mysql.createConnection({
-        host: congif.host,
+        host: config.host,
         port: config.port,
         user: auth.dbuser,
         password: auth.dbpassword

@@ -45,6 +45,7 @@ function handleDisconnect() {
         }
     });
 }
+handleDisconnect();
 
 
 bot.on("ready", function (evt) {

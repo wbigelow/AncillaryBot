@@ -1,10 +1,8 @@
 let Discord = require("discord.js");
 let logger = require("winston");
 let auth = require("./auth.json");
+let config = require("./config.json")
 let mysql = require('mysql');
-
-// Configs
-let anonymous_message_logging = false;
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -13,26 +11,40 @@ logger.add(logger.transports.Console, {
 });
 logger.level = "debug";
 
-// Init db connection
-let con = mysql.createConnection({
-  host: auth.host,
-  port: auth.port,
-  user: auth.user,
-  password: auth.password
-});
+
 
 // Initialize Discord Bot
 let bot = new Discord.Client();
 bot.login(auth.token);
 
-// Connect to db
-con.connect(function(err) {
-    if (err) throw err;
-    logger.info("Connected to DB.");
-    con.query("use discord;", function (err, result) {
-        if (err) throw err;
+// Init db, handle disconnects
+let con;
+function handleDisconnect() {
+    con = mysql.createConnection({
+        host: congif.host,
+        port: config.port,
+        user: auth.dbuser,
+        password: auth.dbpassword
     });
-});
+    con.connect(function(err) {
+        if(err) {
+            logger.error('error when connecting to db:', err);
+            setTimeout(handleDisconnect, 2000);
+        }
+        con.query("use discord;", function (err, result) {
+            if (err) throw err;
+        });
+    });
+
+    con.on('error', function(err) {
+        logger.error('db error', err);
+        if(err.code === 'PROTOCOL_CONNECTION_LOST') { 
+            handleDisconnect();
+        } else {
+             throw err;
+        }
+    });
+}
 
 
 bot.on("ready", function (evt) {
@@ -40,7 +52,7 @@ bot.on("ready", function (evt) {
 });
 
 bot.on("message", message => {
-    if (message.content.substring(0, 1) == '>' && !message.author.bot) {
+    if(message.content.substring(0, 1) == '>' && !message.author.bot) {
         logger.info(message.content);
         let cmd = message.content.substring(1, message.content.indexOf(" "));
         switch(cmd) {
@@ -63,7 +75,7 @@ bot.on("message", message => {
 });
 
 function anon(message) {
-    if(anonymous_message_logging) {
+    if(eval(config.anonymous_message_logging)) {
         logger.info("Anon message sent by " + message.author.username + ": " + message.content);
     }
     let content = message.content.substring(message.content.indexOf(" "));

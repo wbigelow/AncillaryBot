@@ -70,10 +70,23 @@ bot.on("message", message => {
             case "anon":
                 anon(message);
                 break;
+            case "botsay":
+                botsay(message);
+                break;
          }
     }
 
 });
+
+function botsay(message) {
+    if(eval(config.anonymous_message_logging)) {
+        logger.info("Anon message sent by " + message.author.username + ": " + message.content);
+    }
+    let content = message.content.substring(message.content.indexOf(" "));
+    let channel = message.channel;
+    channel.send(content);
+    message.delete();
+}
 
 function anon(message) {
     if(eval(config.anonymous_message_logging)) {

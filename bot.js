@@ -12,7 +12,7 @@ logger.add(logger.transports.Console, {
 logger.level = "debug";
 
 // Anon IDs
-let ids;
+let ids = new Array();
 let idResetTimer;
 
 // Initialize Discord Bot
@@ -57,6 +57,9 @@ bot.on("ready", function (evt) {
 bot.on("message", message => {
     if(message.content.substring(0, 1) == '>' && !message.author.bot) {
         let cmd = message.content.substring(1, message.content.indexOf(" "));
+        if(message.content.indexOf(" ") == -1) {
+            cmd = message.content.substring(1);
+        }
         switch(cmd) {
             case "dbexec":
                 if(message.author.id == "117154757818187783") {
@@ -101,7 +104,8 @@ function anon(message) {
     }
     if(!idResetTimer) {
         idResetTimer = setTimeout(function() {
-            ids = null;
+            ids = new Array();
+            idResetTimer = null;
         }, 3600000);
     }
     content = "`" + ids[message.author.username] + "` " + content;
@@ -110,7 +114,7 @@ function anon(message) {
 
 function reID(username) {
     let id = Math.floor(Math.random() * 1000);
-    ids[message.author.username] = id;
+    ids[username] = id;
 }
 
 function dbexec(message, channel, output) {

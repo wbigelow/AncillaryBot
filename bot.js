@@ -11,7 +11,9 @@ logger.add(logger.transports.Console, {
 });
 logger.level = "debug";
 
-
+// Anon IDs
+let ids;
+let idResetTimer;
 
 // Initialize Discord Bot
 let bot = new Discord.Client();
@@ -54,7 +56,6 @@ bot.on("ready", function (evt) {
 
 bot.on("message", message => {
     if(message.content.substring(0, 1) == '>' && !message.author.bot) {
-        logger.info(message.content);
         let cmd = message.content.substring(1, message.content.indexOf(" "));
         switch(cmd) {
             case "dbexec":
@@ -64,14 +65,14 @@ bot.on("message", message => {
                     message.channel.send("```\nError: Unauthorized\n```");
                 }
                 break;
-            case "quote":
-                quote(message);
-                break;
             case "anon":
                 anon(message);
                 break;
             case "botsay":
                 botsay(message);
+                break;
+            case "reID":
+                reID(message.author.username);
                 break;
          }
     }
@@ -90,12 +91,26 @@ function botsay(message) {
 
 function anon(message) {
     if(eval(config.anonymous_message_logging)) {
-        logger.info("Anon message sent by " + message.author.username + ": " + message.content);
+        logger.info(message.author.username + " sent: " + message.content);
     }
     let content = message.content.substring(message.content.indexOf(" "));
     let anonChannel = bot.channels.get("421077888159449088");
+    if(!ids[message.author.username]) {
+        let id = Math.floor(Math.random() * 1000);
+        ids[message.author.username] = id;
+    }
+    if(!idResetTimer) {
+        idResetTimer = setTimeout(function() {
+            ids = null;
+        }, 3600000);
+    }
+    content = "`" + ids[message.author.username] + "` " + content;
     anonChannel.send(content);
-    message.delete();
+}
+
+function reID(username) {
+    let id = Math.floor(Math.random() * 1000);
+    ids[message.author.username] = id;
 }
 
 function dbexec(message, channel, output) {
@@ -113,31 +128,4 @@ function dbexec(message, channel, output) {
     });
 }
 
-function quote(message) {
-    let quote = message.content.substring(message.content.indexOf(" ") + 1);
-    let modifier = quote.substring(0, quote.indexOf(" "));
-    if(!modifier) {
-        modifier = quote;
-    }
-    quote = sanitize(quote.substring(quote.indexOf(" ") + 1));
-    if(modifier === "add") {
-        let author = quote.substring(0, quote.indexOf(" - "));
-        quote = quote.substring(quote.indexOf(" - ") + 3);
-        dbexec("INSERT INTO Quotes(Author, Quote) VALUES (\"" + author + "\",\"" + quote + "\");", message.channel, false);
-    } else if(modifier === "get") {
-        let author = quote;
-        logger.info("author:" + author);
-        dbexec("SELECT * FROM Quotes WHERE Author = '" + author + "';", message.channel, true);
-    } else if(modifier === "delete") {
-        dbexec("DELETE FROM Quotes WHERE ID='"+ quote +"';", message.channel, false);
-    } else if(modifier === "random") {
-        dbexec("SELECT * FROM Quotes ORDER BY RAND() LIMIT 1;", message.channel, true);
-    } else {
-        message.channel.send("Usage:\n\n`>quote add Author - Quote`\n`>quote get Author`\n`>quote delete ID`\n`>quote random`");
-    }
-}
-
-function sanitize(string) {
-    return string.replace("\\","").replace("\"","\\\"").replace("'","\\'");
-}
 

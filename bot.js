@@ -59,9 +59,9 @@ bot.on("ready", function (evt) {
 
 bot.on("message", message => {
     if(message.content.substring(0, 1) == '>' && !message.author.bot) {
-        let cmd = message.content.substring(1, message.content.indexOf(" "));
+        let cmd = message.content.substring(1, message.content.indexOf(" ")).toLowerCase();
         if(message.content.indexOf(" ") == -1) {
-            cmd = message.content.substring(1);
+            cmd = message.content.substring(1).toLowerCase();
         }
         switch(cmd) {
             case "eval":
@@ -70,6 +70,7 @@ bot.on("message", message => {
                 } else {
                     message.channel.send("```\nError: Unauthorized\n```");
                 }
+                break;
             case "dbexec":
                 if(message.author.id == "117154757818187783") {
                     dbexec(message.content.substring(message.content.indexOf(" ")), message.channel, true); 
@@ -83,7 +84,7 @@ bot.on("message", message => {
             case "botsay":
                 botsay(message);
                 break;
-            case "reID":
+            case "reid":
                 reID(message.author);
                 break;
             case "message":

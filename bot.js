@@ -11,9 +11,10 @@ logger.add(logger.transports.Console, {
 });
 logger.level = "debug";
 
-// Anon IDs
-let ids = new Array();
-let idResetTimer;
+// ID mapping for Anonymous channel
+let anonIDMap = new Map();
+// ID Reset timer
+setInterval(resetIDs, 86400000);
 
 // Initialize Discord Bot
 let bot = new Discord.Client();
@@ -52,6 +53,8 @@ handleDisconnect();
 
 bot.on("ready", function (evt) {
     logger.info("Connected to discord");
+    let anonChannel = bot.channels.get("421077888159449088");
+    anonChannel.send("`Ancillary Bot Online`");
 });
 
 bot.on("message", message => {
@@ -61,6 +64,12 @@ bot.on("message", message => {
             cmd = message.content.substring(1);
         }
         switch(cmd) {
+            case "eval":
+                if(message.author.id == "117154757818187783") {
+                    message.channel.send(eval(message.content.substring(message.content.indexOf(" ") + 1)));
+                } else {
+                    message.channel.send("```\nError: Unauthorized\n```");
+                }
             case "dbexec":
                 if(message.author.id == "117154757818187783") {
                     dbexec(message.content.substring(message.content.indexOf(" ")), message.channel, true); 
@@ -75,7 +84,10 @@ bot.on("message", message => {
                 botsay(message);
                 break;
             case "reID":
-                reID(message.author.username);
+                reID(message.author);
+                break;
+            case "message":
+                anonMessage(message);
                 break;
          }
     }
@@ -84,12 +96,14 @@ bot.on("message", message => {
 
 function botsay(message) {
     if(eval(config.anonymous_message_logging)) {
-        logger.info("Anon message sent by " + message.author.username + ": " + message.content);
+        logger.info(message.author.username + " sent: " + message.content);
     }
     let content = message.content.substring(message.content.indexOf(" "));
     let channel = message.channel;
     channel.send(content);
-    message.delete();
+    if(message.channel.type != "dm") {
+        message.delete();
+    }
 }
 
 function anon(message) {
@@ -98,23 +112,51 @@ function anon(message) {
     }
     let content = message.content.substring(message.content.indexOf(" "));
     let anonChannel = bot.channels.get("421077888159449088");
-    if(!ids[message.author.username]) {
-        let id = Math.floor(Math.random() * 1000);
-        ids[message.author.username] = id;
+    if(!anonIDMap.has(message.author)) {
+        reID(message.author);
     }
-    if(!idResetTimer) {
-        idResetTimer = setTimeout(function() {
-            ids = new Array();
-            idResetTimer = null;
-        }, 3600000);
-    }
-    content = "`" + ids[message.author.username] + "` " + content;
+    content = "`" + anonIDMap.get(message.author) + "` " + content;
     anonChannel.send(content);
+    if(message.channel.type != "dm") {
+        message.delete();
+    }
 }
 
-function reID(username) {
+function reID(author) {
+    if(anonIDMap.has(author)) {
+        let oldID = anonIDMap.get(author);
+        anonIDMap.delete(oldID);
+        anonIDMap.delete(author);
+    }
     let id = Math.floor(Math.random() * 1000);
-    ids[username] = id;
+    while(anonIDMap.has(id)) {
+        id = Math.floor(Math.random() * 1000);
+    }
+    anonIDMap.set(author, id);
+    anonIDMap.set(id, author);
+    author.send("You are now sending messages under the ID: `" + id + "`");
+}
+
+function resetIDs() {
+    let anonChannel = bot.channels.get("421077888159449088");
+    anonChannel.send("`Resetting IDs`");
+    anonIDMap.clear();
+}
+
+function anonMessage(message) {
+    let stripped = message.content.substring(message.content.indexOf(" ") + 1);
+    let targetID = parseInt(stripped);
+    let content = stripped.substring(stripped.indexOf(" ") + 1);
+    if(anonIDMap.has(targetID)) {
+        if(!anonIDMap.has(message.author)) {
+            reID(message.author);
+        }
+        let target = anonIDMap.get(targetID);
+        target.send("`" + anonIDMap.get(message.author) + "` " + content);
+        message.author.send("`Message sent`");
+    } else {
+        message.author.send("`Error: I couldn't find a user with that ID`");
+    }
 }
 
 function dbexec(message, channel, output) {

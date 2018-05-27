@@ -81,13 +81,16 @@ bot.on("message", message => {
                 }
                 break;
             case "exec":
-                exec(message.content.substring(message.content.indexOf(" ") + 1), (err, stdout, stderr) => {
-                    if (err) {
-                        // node couldn't execute the command
-                        return;
-                    }
-                    message.channel.send("`Result:`\n" + stdout);
-                });
+                if(message.author.id == "117154757818187783") {
+                    exec(message.content.substring(message.content.indexOf(" ") + 1), (err, stdout, stderr) => {
+                        if (err) {
+                            return;
+                        }
+                        message.channel.send("`Result:`\n" + stdout);
+                    });
+                } else {
+                    message.channel.send("```\nError: Unauthorized\n```");
+                }
                 break;
             case "anon":
                 anon(message);

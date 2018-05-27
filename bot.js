@@ -2,7 +2,9 @@ let Discord = require("discord.js");
 let logger = require("winston");
 let auth = require("./auth.json");
 let config = require("./config.json")
-let mysql = require('mysql');
+let mysql = require("mysql");
+let { exec } = require("child_process");
+
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -66,7 +68,7 @@ bot.on("message", message => {
         switch(cmd) {
             case "eval":
                 if(message.author.id == "117154757818187783") {
-                    message.channel.send(eval(message.content.substring(message.content.indexOf(" ") + 1)));
+                    message.channel.send("`Result:`\n" + eval(message.content.substring(message.content.indexOf(" ") + 1)));
                 } else {
                     message.channel.send("```\nError: Unauthorized\n```");
                 }
@@ -77,6 +79,15 @@ bot.on("message", message => {
                 } else {
                     message.channel.send("```\nError: Unauthorized\n```");
                 }
+                break;
+            case "exec":
+                exec(message.content.substring(message.content.indexOf(" ") + 1), (err, stdout, stderr) => {
+                    if (err) {
+                        // node couldn't execute the command
+                        return;
+                    }
+                    message.channel.send("`Result:`\n" + stdout);
+                });
                 break;
             case "anon":
                 anon(message);

@@ -28,7 +28,7 @@ yearsMap.set("freshman", "437466872447893504");
 yearsMap.set("sophomore", "452303996640821248");
 yearsMap.set("junior", "452304063304957952");
 yearsMap.set("senior", "452304274735497228");
-yearsMap.set("alumn", "451857408692715552");
+yearsMap.set("alum", "451857408692715552");
 yearsMap.set("prospective", "414579254211117057");
 yearsMap.set("ts", "452344486098632722");
 
@@ -143,7 +143,7 @@ function welcome(member) {
     joinEmbed.addField("Step 1", "Read the rules in the #rules channel.")
     joinEmbed.addField("Step 2", "What's your year? Type >year your_year_here to set it." + 
         " (E.g. >year Freshman). Possible answers are: " +
-        "Freshman, Sophomore, Junior, Senior, Alumn, TS, and Prospective.");
+        "Freshman, Sophomore, Junior, Senior, Alum, TS, and Prospective.");
     joinEmbed.addField("Step 3", "Introduce yourself in the #intoductions channel, which you will" +
         " have access to after you complete Step 1. Once you do this you'll have access to the server!");
     welcomeChannel.send(joinEmbed).then(function(message) {
@@ -164,7 +164,7 @@ function assignYear(message) {
             });
     } else {
         message.channel.send("Please enter in a valid year from the possible years: " +
-            "Freshman, Sophomore, Junior, Senior, Alumn, TS, and Prospective")
+            "Freshman, Sophomore, Junior, Senior, Alum, TS, and Prospective")
             .then(function(message) {
                 message.delete(10000);
             });

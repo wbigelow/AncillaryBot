@@ -22,6 +22,17 @@ setInterval(resetIDs, 86400000);
 let bot = new Discord.Client();
 bot.login(auth.token);
 
+// Years map
+let yearsMap = new Map();
+yearsMap.set("freshman", "437466872447893504");
+yearsMap.set("sophomore", "452303996640821248");
+yearsMap.set("junior", "452304063304957952");
+yearsMap.set("senior", "452304274735497228");
+yearsMap.set("alumn", "451857408692715552");
+yearsMap.set("prospective", "414579254211117057");
+yearsMap.set("ts", "452344486098632722");
+
+
 // Init db, handle disconnects
 let con;
 function handleDisconnect() {
@@ -56,10 +67,10 @@ handleDisconnect();
 bot.on("ready", function (evt) {
     logger.info("Connected to discord");
     let anonChannel = bot.channels.get("421077888159449088");
-    anonChannel.send("`Ancillary Bot Online`");
 });
 
 bot.on("message", message => {
+    giveAccess(message);
     if(message.content.substring(0, 1) == '>' && !message.author.bot) {
         let cmd = message.content.substring(1, message.content.indexOf(" ")).toLowerCase();
         if(message.content.indexOf(" ") == -1) {
@@ -104,10 +115,69 @@ bot.on("message", message => {
             case "message":
                 anonMessage(message);
                 break;
+            case "verify":
+                verify(message);
+                break;
+            case "welcome":
+                welcome(message.member);
+                break;
+            case "year":
+                assignYear(message);
+                break;
          }
     }
 
 });
+
+bot.on("guildMemberAdd", function (member) {
+    welcome(member);
+});
+
+function welcome(member) {
+    member.addRole("452308369961648128");
+    let welcomeChannel = bot.channels.get("452271450653720588"); // Welcome channel ID
+    let joinEmbed = new Discord.RichEmbed();
+    joinEmbed.setTitle("Welcome " + member.displayName + "!");
+    joinEmbed.setColor("#53ff1a");
+    joinEmbed.addField("Instructions", "Please do the following to gain access to the server");
+    joinEmbed.addField("Step 1", "Read the rules in the #rules channel.")
+    joinEmbed.addField("Step 2", "What's your year? Type >year your_year_here to set it." + 
+        " (E.g. >year Freshman). Possible answers are: " +
+        "Freshman, Sophomore, Junior, Senior, Alumn, TS, and Prospective.");
+    joinEmbed.addField("Step 3", "Introduce yourself in the #intoductions channel, which you will" +
+        " have access to after you complete Step 1. Once you do this you'll have access to the server!");
+    welcomeChannel.send(joinEmbed).then(function(message) {
+        message.delete(1800000);
+    });
+}
+
+function assignYear(message) {
+    let year = message.content.substring(message.content.indexOf(" ") + 1);
+    year = year.toLowerCase();
+    message.delete();
+    if(yearsMap.has(year)) {
+        message.member.addRole(yearsMap.get(year));
+        message.channel.send("Thanks for adding your year! You can now introduce yourself" +
+            " in the #introduce-yourself channel.")
+            .then(function(message) {
+                message.delete(10000);
+            });
+    } else {
+        message.channel.send("Please enter in a valid year from the possible years: " +
+            "Freshman, Sophomore, Junior, Senior, Alumn, TS, and Prospective")
+            .then(function(message) {
+                message.delete(10000);
+            });
+    }
+}
+
+function giveAccess(message) {
+    if( message.member && message.member.roles.has("452308369961648128") &&
+        message.channel.id == 452302353559977984) {
+            message.member.removeRole("452308369961648128");
+            message.member.addRole("452272203078172692");
+    }
+}
 
 function botsay(message) {
     if(eval(config.anonymous_message_logging)) {
@@ -115,7 +185,7 @@ function botsay(message) {
     }
     let content = message.content.substring(message.content.indexOf(" "));
     let channel = message.channel;
-    channel.send(content);
+    channel.send(removePing(content));
     if(message.channel.type != "dm") {
         message.delete();
     }
@@ -131,7 +201,7 @@ function anon(message) {
         reID(message.author);
     }
     content = "`" + anonIDMap.get(message.author) + "` " + content;
-    anonChannel.send(content);
+    anonChannel.send(removePing(content));
     if(message.channel.type != "dm") {
         message.delete();
     }
@@ -188,5 +258,29 @@ function dbexec(message, channel, output) {
         }
     });
 }
+
+function removePing(message) {
+    return message.replace(/@/g, "");
+}
+
+function verify(message) {
+    con.query("SELECT COUNT(*) FROM Verified WHERE name='" + message.author.tag + "';",
+    function(err, result) {
+        if(err) {
+            logger.error(err);
+        } else {
+            let res = JSON.stringify(result);
+            if(res.includes("1")) {
+                message.member.addRole("451133170616893441"); // Verified Role
+                message.author.send("Thanks for verifying! You are now free to talk in all channels");
+            } else {
+                message.author.send("Sorry, you haven't verified your UWNetID yet.");
+                message.author.send("Please verify at https://students.washington.edu/wbigelow/discordauth");
+            }
+            message.delete();
+        }
+    });
+}
+
 
 

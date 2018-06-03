@@ -145,7 +145,7 @@ function welcome(member) {
         " (E.g. >year Freshman). Possible answers are: " +
         "Freshman, Sophomore, Junior, Senior, Alum, TS, and Prospective.");
     joinEmbed.addField("Step 3", "Introduce yourself in the #intoductions channel, which you will" +
-        " have access to after you complete Step 1. Once you do this you'll have access to the server!");
+        " have access to after you complete Step 1 and 2. Once you do this you'll have access to the server!");
     welcomeChannel.send(joinEmbed).then(function(message) {
         message.delete(1800000);
     });

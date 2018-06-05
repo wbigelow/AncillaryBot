@@ -172,10 +172,14 @@ function assignYear(message) {
 }
 
 function giveAccess(message) {
-    if( message.member && message.member.roles.has("452308369961648128") &&
+    if(message.member && message.member.roles.has("452308369961648128") &&
         message.channel.id == 452302353559977984) {
             message.member.removeRole("452308369961648128");
             message.member.addRole("452272203078172692");
+    }
+    if(message.member && message.member.roles.has("452348969830449152")
+        && message.member.roles.has("452272203078172692")) {
+        message.member.removeRole("452272203078172692");
     }
 }
 

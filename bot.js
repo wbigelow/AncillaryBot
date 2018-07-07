@@ -15,6 +15,9 @@ logger.level = "debug";
 
 // ID mapping for Anonymous channel
 let anonIDMap = new Map();
+// List of blacklisted members
+let blacklist = new Array();
+
 // ID Reset timer
 setInterval(resetIDs, 86400000);
 
@@ -31,6 +34,7 @@ yearsMap.set("senior", "452304274735497228");
 yearsMap.set("alum", "451857408692715552");
 yearsMap.set("prospective", "414579254211117057");
 yearsMap.set("ts", "452344486098632722");
+yearsMap.set("grad", "461818517600206868");
 
 
 // Init db, handle disconnects
@@ -70,38 +74,28 @@ bot.on("ready", function (evt) {
 });
 
 bot.on("message", message => {
-    giveAccess(message);
+    // Command
     if(message.content.substring(0, 1) == '>' && !message.author.bot) {
-        let cmd = message.content.substring(1, message.content.indexOf(" ")).toLowerCase();
-        if(message.content.indexOf(" ") == -1) {
-            cmd = message.content.substring(1).toLowerCase();
-        }
+        const cmdAndArgs = message.content.split(" ");
+        const cmd = cmdAndArgs[0].substring(1);
+        const args = cmdAndArgs;
+        args.shift();
         switch(cmd) {
             case "eval":
-                if(message.author.id == "117154757818187783") {
-                    message.channel.send("`Result:`\n" + eval(message.content.substring(message.content.indexOf(" ") + 1)));
-                } else {
-                    message.channel.send("```\nError: Unauthorized\n```");
+                if(checkOwner(message)) {
+                    const result = eval(args.join(" "));
+                    if(result) {
+                        message.channel.send(result);
+                    }
                 }
                 break;
             case "dbexec":
-                if(message.author.id == "117154757818187783") {
-                    dbexec(message.content.substring(message.content.indexOf(" ")), message.channel, true); 
-                } else {
-                    message.channel.send("```\nError: Unauthorized\n```");
+                if(checkOwner(message)) {
+                    dbexec(args.join(" "), message.channel, true); 
                 }
                 break;
             case "exec":
-                if(message.author.id == "117154757818187783") {
-                    exec(message.content.substring(message.content.indexOf(" ") + 1), (err, stdout, stderr) => {
-                        if (err) {
-                            return;
-                        }
-                        message.channel.send("`Result:`\n" + stdout);
-                    });
-                } else {
-                    message.channel.send("```\nError: Unauthorized\n```");
-                }
+                execCode(message.author, args);
                 break;
             case "anon":
                 anon(message);
@@ -115,16 +109,20 @@ bot.on("message", message => {
             case "message":
                 anonMessage(message);
                 break;
-            case "verify":
-                verify(message);
+            case "makeWelcomeEmbed":
+                makeWelcomeEmbed(message.channel);
                 break;
-            case "welcome":
-                welcome(message.member);
+            case "blacklist":
+                if(checkOwner(message)) {
+                    blackList(args[0]);
+                }
                 break;
-            case "year":
-                assignYear(message);
+            case "mute":
+                mute(args[0], args[1]);
                 break;
          }
+    } else if(message.channel.id == 452271450653720588 && !message.author.bot) {
+        assignYear(message);
     }
 
 });
@@ -133,26 +131,50 @@ bot.on("guildMemberAdd", function (member) {
     welcome(member);
 });
 
+function mute(user, time) {
+    // TODO: Implement this.
+}
+
 function welcome(member) {
     member.addRole("452308369961648128");
     let welcomeChannel = bot.channels.get("452271450653720588"); // Welcome channel ID
-    let joinEmbed = new Discord.RichEmbed();
-    joinEmbed.setTitle("Welcome " + member.displayName + "!");
-    joinEmbed.setColor("#53ff1a");
-    joinEmbed.addField("Instructions", "Please do the following to gain access to the server");
-    joinEmbed.addField("Step 1", "Read the rules in the #rules channel.")
-    joinEmbed.addField("Step 2", "What's your year? Type >year your_year_here to set it." + 
-        " (E.g. >year Freshman). Possible answers are: " +
-        "Freshman, Sophomore, Junior, Senior, Alum, TS, and Prospective.");
-    joinEmbed.addField("Step 3", "Introduce yourself in the #intoductions channel, which you will" +
-        " have access to after you complete Step 1 and 2. Once you do this you'll have access to the server!");
-    welcomeChannel.send(joinEmbed).then(function(message) {
-        message.delete(1800000);
-    });
+    welcomeChannel.send("Welcome to the server " + member + "! Please follow the Instructions above!")
+        .then(function(message) {
+            message.delete(1800000);
+        });
+}
+
+function makeWelcomeEmbed(channel) {
+    if(checkOwner) {
+        let joinEmbed = new Discord.RichEmbed();
+        joinEmbed.setTitle("Welcome to the UW Discord!");
+        joinEmbed.setColor("#53ff1a");
+        joinEmbed.addField("Instructions", "Please do the following to gain access to the server");
+        joinEmbed.addField("Step 1", "Read the rules in the #rules channel.")
+        joinEmbed.addField("Step 2", "What's your year? Type your year to set it." + 
+            "Possible answers are: " +
+            "Freshman, Sophomore, Junior, Senior, Grad, Alum, TS, and Prospective.");
+        joinEmbed.addField("Step 3", "Introduce yourself in the #intoductions channel, which you will" +
+            " have access to after you complete Step 1 and 2. Once you do this you'll have access to the server!");
+        channel.send(joinEmbed);
+    }
+}
+
+function execCode(author) {
+    if(checkOwner(message)) {
+        exec(args.toString(), (err, stdout, stderr) => {
+            if (err) {
+                return;
+            }
+            if(stdout) {
+                message.channel.send(stdout);
+            }
+        });
+    }
 }
 
 function assignYear(message) {
-    let year = message.content.substring(message.content.indexOf(" ") + 1);
+    let year = message.content;
     year = year.toLowerCase();
     message.delete();
     if(yearsMap.has(year)) {
@@ -164,7 +186,7 @@ function assignYear(message) {
             });
     } else {
         message.channel.send("Please enter in a valid year from the possible years: " +
-            "Freshman, Sophomore, Junior, Senior, Alum, TS, and Prospective")
+            "Freshman, Sophomore, Junior, Senior, Grad, Alum, TS, and Prospective")
             .then(function(message) {
                 message.delete(10000);
             });
@@ -177,35 +199,27 @@ function giveAccess(message) {
             message.member.removeRole("452308369961648128");
             message.member.addRole("452272203078172692");
     }
-    if(message.member && message.member.roles.has("452348969830449152")
-        && message.member.roles.has("452272203078172692")) {
-        message.member.removeRole("452272203078172692");
-    }
 }
 
 function botsay(message) {
-    if(eval(config.anonymous_message_logging)) {
-        logger.info(message.author.username + " sent: " + message.content);
-    }
     let content = message.content.substring(message.content.indexOf(" "));
     let channel = message.channel;
-    channel.send(removePing(content));
+    channel.send(content);
     if(message.channel.type != "dm") {
         message.delete();
     }
 }
 
 function anon(message) {
-    if(eval(config.anonymous_message_logging)) {
-        logger.info(message.author.username + " sent: " + message.content);
-    }
     let content = message.content.substring(message.content.indexOf(" "));
     let anonChannel = bot.channels.get("421077888159449088");
     if(!anonIDMap.has(message.author)) {
         reID(message.author);
     }
     content = "`" + anonIDMap.get(message.author) + "` " + content;
-    anonChannel.send(removePing(content));
+    if(!blacklist.includes(message.author)) {
+        anonChannel.send(content);
+    }
     if(message.channel.type != "dm") {
         message.delete();
     }
@@ -230,6 +244,7 @@ function resetIDs() {
     let anonChannel = bot.channels.get("421077888159449088");
     anonChannel.send("`Resetting IDs`");
     anonIDMap.clear();
+    blacklist = new Array();
 }
 
 function anonMessage(message) {
@@ -248,6 +263,11 @@ function anonMessage(message) {
     }
 }
 
+function blackList(id) {
+    const author = anonIDMap.get(parseInt(id));
+    blacklist.push(author);
+}
+
 function dbexec(message, channel, output) {
     con.query(message, function (err, result) {
         if (err) {
@@ -263,27 +283,13 @@ function dbexec(message, channel, output) {
     });
 }
 
-function removePing(message) {
-    return message.replace(/@/g, "");
-}
-
-function verify(message) {
-    con.query("SELECT COUNT(*) FROM Verified WHERE name='" + message.author.tag + "';",
-    function(err, result) {
-        if(err) {
-            logger.error(err);
-        } else {
-            let res = JSON.stringify(result);
-            if(res.includes("1")) {
-                message.member.addRole("451133170616893441"); // Verified Role
-                message.author.send("Thanks for verifying! You are now free to talk in all channels");
-            } else {
-                message.author.send("Sorry, you haven't verified your UWNetID yet.");
-                message.author.send("Please verify at https://students.washington.edu/wbigelow/discordauth");
-            }
-            message.delete();
-        }
-    });
+/**
+ * Checks if the author of the message is the owner of the bot
+ * @Param message the message sent
+ * @Returns true if the uthor of the message is the owner of the bot
+ */
+function checkOwner(message) {
+    return message.author.id == "117154757818187783";
 }
 
 

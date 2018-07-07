@@ -154,7 +154,7 @@ function makeWelcomeEmbed(channel) {
         joinEmbed.addField("Step 2", "What's your year? Type your year to set it." + 
             "Possible answers are: " +
             "Freshman, Sophomore, Junior, Senior, Grad, Alum, TS, and Prospective.");
-        joinEmbed.addField("Step 3", "Introduce yourself in the #intoductions channel, which you will" +
+        joinEmbed.addField("Step 3", "Introduce yourself in the #introduce-yourself channel, which you will" +
             " have access to after you complete Step 1 and 2. Once you do this you'll have access to the server!");
         channel.send(joinEmbed);
     }

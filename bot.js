@@ -151,7 +151,7 @@ function makeWelcomeEmbed(channel) {
         joinEmbed.setColor("#53ff1a");
         joinEmbed.addField("Instructions", "Please do the following to gain access to the server");
         joinEmbed.addField("Step 1", "Read the rules in the #rules channel.")
-        joinEmbed.addField("Step 2", "What's your year? Type your year to set it." + 
+        joinEmbed.addField("Step 2", "What's your year? Type your year to set it. " + 
             "Possible answers are: " +
             "Freshman, Sophomore, Junior, Senior, Grad, Alum, TS, and Prospective.");
         joinEmbed.addField("Step 3", "Introduce yourself in the #introduce-yourself channel, which you will" +
@@ -198,6 +198,8 @@ function giveAccess(message) {
         message.channel.id == 452302353559977984) {
             message.member.removeRole("452308369961648128");
             message.member.addRole("452272203078172692");
+            const generalChannel = bot.channels.get("362689877751627777");
+            generalChannel.send("Welcome to the server " + message.member + "!");
     }
 }
 

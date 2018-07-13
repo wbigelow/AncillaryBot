@@ -75,6 +75,7 @@ bot.on("ready", function (evt) {
 
 bot.on("message", message => {
     // Command
+    giveAccess(message);
     if(message.content.substring(0, 1) == '>' && !message.author.bot) {
         const cmdAndArgs = message.content.split(" ");
         const cmd = cmdAndArgs[0].substring(1);

@@ -86,9 +86,9 @@ bot.on("message", message => {
                 if(checkOwner(message)) {
                     try {
                         message.channel.send(eval(args.join(" ")));
-                    } catch(error => {
+                    } catch(error) {
                         logger.error(error);
-                    })
+                    }
                 }
                 break;
             case "dbexec":

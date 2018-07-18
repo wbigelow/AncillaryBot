@@ -84,10 +84,11 @@ bot.on("message", message => {
         switch(cmd) {
             case "eval":
                 if(checkOwner(message)) {
-                    const result = eval(args.join(" "));
-                    if(result) {
-                        message.channel.send(result);
-                    }
+                    try {
+                        message.channel.send(eval(args.join(" ")));
+                    } catch(error => {
+                        logger.error(error);
+                    })
                 }
                 break;
             case "dbexec":

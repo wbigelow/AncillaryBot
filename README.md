@@ -2,8 +2,9 @@
 Welcome to Ancillary, a Discord bot designed for the UW Discord.
 Ancillary is coded in Java, which is slightly different than how most Discord bots are done.
 The benefit of this is that adding new commands to Ancillary is incredibly easy.
-
 ## How to add a new Command
+Ancillary uses [JavaCord](https://javacord.org/wiki/getting-started/welcome/) to send commands to Discord. If the wiki doesn't answer your
+questions try the [documentation](https://docs.javacord.org/api/v/3.0.0/overview-summary.html).
 ### Modules
 Ancillary uses modules to encapsulate groups of related commands.
 The benefit of this is that a new module can be added under the modules package and Ancillary

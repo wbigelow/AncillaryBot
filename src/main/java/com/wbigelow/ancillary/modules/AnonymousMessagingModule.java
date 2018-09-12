@@ -94,7 +94,7 @@ public class AnonymousMessagingModule implements Module {
         }
     }
 
-        final class GetNewIDCommand implements Command {
+    final class GetNewIDCommand implements Command {
 
         @Override
         public String getName() {

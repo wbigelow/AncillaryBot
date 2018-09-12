@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'io.franzbecker.gradle-lombok' version '1.14'
+}
+
+group 'com.wbigelow'
+version '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile 'org.javacord:javacord:3.0.0'
+    compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
+}
+
+lombok {
+    version = '1.18.2'
+    sha256 = ""
+}
+
+task fullJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Implementation-Version': version,
+                'Main-Class': 'com.wbigelow.ancillary.AncillaryEntry'
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}

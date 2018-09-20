@@ -18,6 +18,8 @@ which is what is called when someone types in the keyword. Commands should all i
 ### Example
 Take a look at the PingModule, this is a simple command that just replies with the word pong when invoked.
 For more examples, look at the "uw" git branch, many of these commands are specific to a different server, so don't try pulling that branch.
+### Setting up Ancillary
+You will need to add your server id, admin role id, and mod role id to ancillary's CommandManager.java file.
 ### Running Ancillary
 Since Ancillary uses gradle, when you clone Ancillary and build it using your IDE (I recommend IntelliJ IDEA),
 it will create ancillary-1.0.jar under the build/libs directory. You can then run it by running the bash command
@@ -25,3 +27,5 @@ it will create ancillary-1.0.jar under the build/libs directory. You can then ru
 token, which you can learn how to create by doing a quick google search.
 ### Commands
 Ancillary's trigger character is `>`. You can use `>help` to see all the available commands, your commands will also appear. 
+### Questions?
+You can add me on discord Snowcrash#4558 if you have any questions. I can also take feature requests.

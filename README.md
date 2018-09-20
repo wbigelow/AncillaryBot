@@ -23,3 +23,5 @@ Since Ancillary uses gradle, when you clone Ancillary and build it using your ID
 it will create ancillary-1.0.jar under the build/libs directory. You can then run it by running the bash command
 `java -jar ancillary-1.0.jar YOUR_DISCORD_TOKEN_HERE`. Note that you need to host Ancillary yourself and need a discord bot
 token, which you can learn how to create by doing a quick google search.
+### Commands
+Ancillary's trigger character is `>`. You can use `>help` to see all the available commands, your commands will also appear. 

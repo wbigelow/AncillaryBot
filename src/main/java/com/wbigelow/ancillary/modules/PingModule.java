@@ -5,7 +5,6 @@ import com.wbigelow.ancillary.Command;
 import com.wbigelow.ancillary.Module;
 import com.wbigelow.ancillary.PermissionLevel;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageBuilder;
@@ -21,7 +20,7 @@ public class PingModule implements Module {
         );
     }
 
-    @RequiredArgsConstructor
+    @NoArgsConstructor
     final class PingCommand implements Command {
 
         @Override

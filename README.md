@@ -1,5 +1,5 @@
 # Ancillary Bot
-Welcome to Ancillary, a Discord bot designed for the UW Discord.
+Welcome to Ancillary, a Discord bot that is super customizable.
 Ancillary is coded in Java, which is slightly different than how most Discord bots are done.
 The benefit of this is that adding new commands to Ancillary is incredibly easy.
 ## How to add a new Command
@@ -17,6 +17,9 @@ will appear in the help message, a permission level which dictates the users who
 which is what is called when someone types in the keyword. Commands should all implement the Command interface.
 ### Example
 Take a look at the PingModule, this is a simple command that just replies with the word pong when invoked.
-### Pull Requests
-When adding a new module and commands, there should only be an addition of a module under the modules package,
-no other modules or files should be modified.
+For more examples, look at the "uw" git branch, many of these commands are specific to a different server, so don't try pulling that branch.
+### Running Ancillary
+Since Ancillary uses gradle, when you clone Ancillary and build it using your IDE (I recommend IntelliJ IDEA),
+it will create ancillary-1.0.jar under the build/libs directory. You can then run it by running the bash command
+`java -jar ancillary-1.0.jar YOUR_DISCORD_TOKEN_HERE`. Note that you need to host Ancillary yourself and need a discord bot
+token, which you can learn how to create by doing a quick google search.

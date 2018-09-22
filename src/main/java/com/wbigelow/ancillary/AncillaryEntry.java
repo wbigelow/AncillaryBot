@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.ClassPath;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
+import org.javacord.api.entity.activity.ActivityType;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -35,5 +36,6 @@ public class AncillaryEntry {
         final String token = args[0];
         final DiscordApi discordApi = new DiscordApiBuilder().setToken(token).login().join();
         discordApi.addMessageCreateListener(new MessageCreateListenerImpl(commandManager, discordApi));
+        discordApi.updateActivity(ActivityType.PLAYING, ">help");
     }
 }

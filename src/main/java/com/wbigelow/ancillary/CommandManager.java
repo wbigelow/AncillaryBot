@@ -17,9 +17,9 @@ import java.util.Map;
  * Manages the commands. Only modification to the file should be the SERVER_ID, MOD_ROLE_ID, and ADMIN_ROLE_ID values.
  */
 public class CommandManager {
-    private static final long SERVER_ID = 0L; // REPLACE 0 WITH YOUR SERVER ID
-    private static final long MOD_ROLE_ID = 0L; // REPLACE 0 WITH THE MOD ROLE ON YOUR SERVER (OR ADMIN IF NO MOD).
-    private static final long ADMIN_ROLE_ID = 0L; // REPLACE 0 WITH THE ADMIN ROLE ON YOUR SERVER.
+    private static final long SERVER_ID = 492957555522404352L; // REPLACE 0 WITH YOUR SERVER ID
+    private static final long MOD_ROLE_ID = 492966167338680320L; // REPLACE 0 WITH THE MOD ROLE ON YOUR SERVER (OR ADMIN IF NO MOD).
+    private static final long ADMIN_ROLE_ID = 492966167338680320L; // REPLACE 0 WITH THE ADMIN ROLE ON YOUR SERVER.
     /**
      * Maps command trigger words to the command.
      */
@@ -58,11 +58,19 @@ public class CommandManager {
                 case MOD:
                     if (userRoles.contains(modRole) || userRoles.contains(adminRole)) {
                         command.execute(message, discordApi);
+                    } else {
+                        new MessageBuilder()
+                                .setContent("You do not have permission to run this command.")
+                                .send(message.getChannel());
                     }
                     break;
                 case ADMIN:
                     if (userRoles.contains(adminRole)) {
                         command.execute(message, discordApi);
+                    } else {
+                        new MessageBuilder()
+                                .setContent("You do not have permission to run this command.")
+                                .send(message.getChannel());
                     }
                     break;
                 default:

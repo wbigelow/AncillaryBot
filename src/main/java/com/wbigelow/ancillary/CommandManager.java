@@ -17,9 +17,9 @@ import java.util.Map;
  * Manages the commands. Only modification to the file should be the SERVER_ID, MOD_ROLE_ID, and ADMIN_ROLE_ID values.
  */
 public class CommandManager {
-    private static final long SERVER_ID = 492957555522404352L; // REPLACE 0 WITH YOUR SERVER ID
-    private static final long MOD_ROLE_ID = 492966167338680320L; // REPLACE 0 WITH THE MOD ROLE ON YOUR SERVER (OR ADMIN IF NO MOD).
-    private static final long ADMIN_ROLE_ID = 492966167338680320L; // REPLACE 0 WITH THE ADMIN ROLE ON YOUR SERVER.
+    private static final long SERVER_ID = 418752116270825473L; // REPLACE 0 WITH YOUR SERVER ID
+    private static final long MOD_ROLE_ID = 449669382776553472L; // REPLACE 0 WITH THE MOD ROLE ON YOUR SERVER (OR ADMIN IF NO MOD).
+    private static final long ADMIN_ROLE_ID = 449669382776553472L; // REPLACE 0 WITH THE ADMIN ROLE ON YOUR SERVER.
     /**
      * Maps command trigger words to the command.
      */
@@ -92,7 +92,7 @@ public class CommandManager {
 
         @Override
         public String getDescription() {
-            return "Messages the user with all the commands ancillary has.";
+            return "Messages the user with all the commands the bot has.";
         }
 
         @Override
@@ -103,7 +103,7 @@ public class CommandManager {
         @Override
         public void execute(final Message message, final DiscordApi discordApi) {
             final EmbedBuilder embedBuilder = new EmbedBuilder()
-                    .setTitle("Here are all the commands Ancillary can do.")
+                    .setTitle("Here are all the commands the bot can do.")
                     .setColor(Color.GREEN);
             for (final Command command : commands.values()) {
                 embedBuilder.addField(command.getName(), command.getDescription());

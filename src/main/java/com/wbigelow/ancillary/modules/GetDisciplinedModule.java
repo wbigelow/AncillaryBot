@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 @NoArgsConstructor
-public class GetMotivatedModule implements Module {
+public class GetDisciplinedModule implements Module {
     private static final AtomicInteger counter = new AtomicInteger();
     private static final Map<String, Session> sessions = new HashMap<>();
 
@@ -38,7 +38,7 @@ public class GetMotivatedModule implements Module {
                 new ModifyWorkCommand(),
                 new DeleteWorkCommand(),
                 new JoinWorkCommand(),
-                new ListWorkCommand()
+                new CheckWorkCommand()
         );
     }
 
@@ -89,11 +89,13 @@ public class GetMotivatedModule implements Module {
                 }
                 if (sessionsRemaining > 1) {
                     breakOverMessage += " Break time has ended now, time to go back to work.";
+                    session.setSessionsRemaining(sessionsRemaining - 1);
                     startSessionTimer(session, channelToUpdate);
                 } else {
                     breakOverMessage += " You've completed all your sessions."
                             + "I hope you got your tasks completed. Please set another one if you need more time.";
                     session.setSessionsRemaining(sessionsRemaining - 1);
+                    sessions.remove(session.getSessionID() + "");
                 }
                 if (session.isEnabled()) {
                     new MessageBuilder()
@@ -419,7 +421,7 @@ public class GetMotivatedModule implements Module {
             final String[] args = message.getContent().split(" ");
             if (args.length != 2) {
                 new MessageBuilder()
-                        .setContent("Invalid arguments. Usage: deletework [sessionID]")
+                        .setContent("Invalid arguments. Usage: joinwork [sessionID]")
                         .send(message.getChannel());
             } else {
                 if (!sessions.containsKey(args[1])) {
@@ -445,16 +447,16 @@ public class GetMotivatedModule implements Module {
         }
     }
 
-    final class ListWorkCommand implements Command {
+    final class CheckWorkCommand implements Command {
 
         @Override
         public String getName() {
-            return "listwork";
+            return "checkwork";
         }
 
         @Override
         public String getDescription() {
-            return "Lists all ongoing tasktrading sessions. Usage: listwork";
+            return "Lists all ongoing tasktrading sessions. Usage: checkwork";
         }
 
         @Override
@@ -466,7 +468,8 @@ public class GetMotivatedModule implements Module {
         public void execute(final Message message, final DiscordApi discordApi) {
             if (sessions.size() == 0) {
                 new MessageBuilder()
-                        .setContent("There are no current sessions.");
+                        .setContent("There are no current sessions.")
+                        .send(message.getChannel());
             } else {
                 sessions.values().forEach(session -> {
                     final List<User> users = session.getMembers();

@@ -48,16 +48,15 @@ public class GetDisciplinedModule implements Module {
      * @param channelToUpdate Channel to send update messages to.
      */
     private void startSessionTimer(final Session session, final TextChannel channelToUpdate) {
-        final int sessionDuration = session.getSessionDuration();
-        final int sessionBreak = session.getSessionBreak();
         final int sessionID = session.getSessionID();
         final int sessionsRemaining = session.getSessionsRemaining();
         new Thread(() -> {
             try {
-                session.setTimeElapsed(0);
-                while (session.getTimeElapsed() < session.getSessionDuration() && session.isEnabled()) {
+                session.setWorkTimeElapsed(0);
+                session.setOnBreak(false);
+                while (session.getWorkTimeElapsed() < session.getSessionDuration() && session.isEnabled()) {
                     Thread.sleep(TimeUnit.MINUTES.toMillis(1));
-                    session.setTimeElapsed(session.getTimeElapsed() + 1);
+                    session.setWorkTimeElapsed(session.getWorkTimeElapsed() + 1);
                 }
             } catch (final InterruptedException e) {
                 e.printStackTrace();
@@ -66,18 +65,19 @@ public class GetDisciplinedModule implements Module {
             String breakMessage = sessionUpdate;
             List<User> users = session.getMembers();
             for (final User user : users) {
-                breakMessage += user.getNicknameMentionTag();
+                breakMessage += user.getNicknameMentionTag() + " ";
             }
-            breakMessage += " Great work! Time to take a break and check in!";
+            breakMessage += "Great work! Time to take a break and check in!";
             if (session.isEnabled()) {
                 new MessageBuilder()
                         .setContent(breakMessage)
                         .send(channelToUpdate);
                 try {
-                    session.setTimeElapsed(0);
-                    while (session.getTimeElapsed() < session.getSessionBreak() && session.isEnabled()) {
+                    session.setBreakTimeElapsed(0);
+                    session.setOnBreak(true);
+                    while (session.getBreakTimeElapsed() < session.getSessionBreak() && session.isEnabled()) {
                         Thread.sleep(TimeUnit.MINUTES.toMillis(1));
-                        session.setTimeElapsed(session.getTimeElapsed() + 1);
+                        session.setBreakTimeElapsed(session.getBreakTimeElapsed() + 1);
                     }
                 } catch (final InterruptedException e) {
                     e.printStackTrace();
@@ -85,14 +85,14 @@ public class GetDisciplinedModule implements Module {
                 String breakOverMessage = sessionUpdate;
                 users = session.getMembers();
                 for (final User user : users) {
-                    breakOverMessage += user.getNicknameMentionTag();
+                    breakOverMessage += user.getNicknameMentionTag() + " ";
                 }
                 if (sessionsRemaining > 1) {
-                    breakOverMessage += " Break time has ended now, time to go back to work.";
+                    breakOverMessage += "Break time has ended now, time to go back to work.";
                     session.setSessionsRemaining(sessionsRemaining - 1);
                     startSessionTimer(session, channelToUpdate);
                 } else {
-                    breakOverMessage += " You've completed all your sessions."
+                    breakOverMessage += "You've completed all your sessions."
                             + "I hope you got your tasks completed. Please set another one if you need more time.";
                     session.setSessionsRemaining(sessionsRemaining - 1);
                     sessions.remove(session.getSessionID() + "");
@@ -121,7 +121,11 @@ public class GetDisciplinedModule implements Module {
         @Setter
         boolean isEnabled;
         @Setter
-        int timeElapsed;
+        int workTimeElapsed;
+        @Setter
+        int breakTimeElapsed;
+        @Setter
+        boolean isOnBreak;
     }
 
     /**
@@ -185,7 +189,8 @@ public class GetDisciplinedModule implements Module {
                     .sessionDuration(sessionDuration)
                     .sessionBreak(sessionBreak)
                     .isEnabled(true)
-                    .timeElapsed(0)
+                    .workTimeElapsed(0)
+                    .breakTimeElapsed(0)
                     .build();
             sessions.put(sessionID + "", createdSession);
             String members = "";
@@ -242,7 +247,7 @@ public class GetDisciplinedModule implements Module {
                 session.setEnabled(false);
                 sessions.remove(session.getSessionID() + "");
                 new MessageBuilder()
-                        .setContent("Session " + session.getSessionID() + " terminated.")
+                        .setContent("Session " + session.getSessionID() + " has been cancelled.")
                         .send(message.getChannel());
             }
         }
@@ -291,7 +296,7 @@ public class GetDisciplinedModule implements Module {
                     sessions.remove(session.getSessionID());
                     session.setEnabled(false);
                     new MessageBuilder()
-                            .setContent("Session " + session.getSessionID() + " terminated due to no members.")
+                            .setContent("Session " + session.getSessionID() + " has been cancelled due to no members.")
                             .send(message.getChannel());
                 }
             }
@@ -392,7 +397,7 @@ public class GetDisciplinedModule implements Module {
                     session.setEnabled(false);
                     sessions.remove(args[1]);
                     new MessageBuilder()
-                            .setContent("Session " + session.getSessionID() + " terminated.")
+                            .setContent("Session " + session.getSessionID() + " has been cancelled.")
                             .send(message.getChannel());
                 }
             }
@@ -478,18 +483,21 @@ public class GetDisciplinedModule implements Module {
                         members += user.getName() + ", ";
                     }
                     members = members.substring(0, members.length() - 2);
+                    final EmbedBuilder embed = new EmbedBuilder()
+                            .setTitle("Session " + session.getSessionID())
+                            .setColor(Color.CYAN)
+                            .addField("Creator", session.getCreator().getName())
+                            .addField("Members", members)
+                            .addField("Work Time", session.getSessionDuration() + " minute(s)")
+                            .addField("Break Time", session.getSessionBreak() + " minute(s)");
+                    if (!session.isOnBreak) {
+                        embed.addField("Work Time Remaining In Current Session", session.getSessionDuration() - session.getWorkTimeElapsed() + " minute(s)");
+                    } else {
+                        embed.addField("Break Time Remaining In Current Session", session.getSessionBreak() - session.getBreakTimeElapsed() + " minute(s)");
+                    }
+                    embed.addField("Sessions Remaining", session.getSessionsRemaining() + " session(s)");
                     new MessageBuilder()
-                            .setEmbed(new EmbedBuilder()
-                                    .setTitle("Session " + session.getSessionID())
-                                    .setColor(Color.CYAN)
-                                    .addField("Creator", session.getCreator().getName())
-                                    .addField("Members", members)
-                                    .addField("Work Time", session.getSessionDuration() + " minute(s)")
-                                    .addField("Break Time", session.getSessionBreak() + " minute(s)")
-                                    .addField("Time Remaining In Current Session",
-                                            session.getSessionDuration() - session.getTimeElapsed() + " minutes(s)")
-                                    .addField("Sessions Remaining", session.getSessionsRemaining() + " session(s)")
-                            )
+                            .setEmbed(embed)
                             .send(message.getChannel());
                 });
             }

@@ -150,9 +150,22 @@ public class GetDisciplinedModule implements Module {
 
         @Override
         public void execute(final Message message, final DiscordApi discordApi) {
-            final List<User> users = new ArrayList<>();
-            users.addAll(message.getMentionedUsers());
             final User author = message.getAuthor().asUser().get();
+            for (final Session session : sessions.values()) {
+                if (session.members.contains(author)) {
+                    new MessageBuilder()
+                            .setContent("You're already in session " + session.getSessionID() + ".")
+                            .send(message.getChannel());
+                    return;
+                }
+                if (session.creator.equals(author)) {
+                    new MessageBuilder()
+                            .setContent("You've already created session " + session.getSessionID() + ". End it to create another.")
+                            .send(message.getChannel());
+                    return;
+                }
+            }
+            final List<User> users = new ArrayList<>(message.getMentionedUsers());
             if (!users.contains(author)) {
                 users.add(author);
             }
@@ -205,7 +218,8 @@ public class GetDisciplinedModule implements Module {
                             .addField("Creator", author.getName())
                             .addField("Members", members)
                             .addField("Work Time", sessionDuration + " minute(s)")
-                            .addField("Break Time", sessionBreak + " minute(s)"))
+                            .addField("Break Time", sessionBreak + " minute(s)")
+                            .addField("Sessions", sessionNumber + " session(s)"))
                     .send(message.getChannel());
             startSessionTimer(createdSession, message.getChannel());
         }
@@ -293,7 +307,7 @@ public class GetDisciplinedModule implements Module {
                         .setContent("You've left session " + session.getSessionID() + ".")
                         .send(message.getChannel());
                 if (members.size() == 0) {
-                    sessions.remove(session.getSessionID());
+                    sessions.remove(session.getSessionID() + "");
                     session.setEnabled(false);
                     new MessageBuilder()
                             .setContent("Session " + session.getSessionID() + " has been cancelled due to no members.")
@@ -434,19 +448,21 @@ public class GetDisciplinedModule implements Module {
                             .setContent("No session with that ID exists.")
                             .send(message.getChannel());
                 } else {
+                    final User author = message.getAuthor().asUser().get();
+                    for (final Session session : sessions.values()) {
+                        if (session.members.contains(author)) {
+                            new MessageBuilder()
+                                    .setContent("You're already in session " + session.getSessionID() + ".")
+                                    .send(message.getChannel());
+                            return;
+                        }
+                    }
                     final Session session = sessions.get(args[1]);
                     final List<User> users = session.getMembers();
-                    final User author = message.getAuthor().asUser().get();
-                    if (users.contains(author)) {
-                        new MessageBuilder()
-                                .setContent("You've already joined session " + session.getSessionID() + ".")
-                                .send(message.getChannel());
-                    } else {
-                        users.add(author);
-                        new MessageBuilder()
-                                .setContent("You've joined session " + session.getSessionID() + "!")
-                                .send(message.getChannel());
-                    }
+                    users.add(author);
+                    new MessageBuilder()
+                            .setContent("You've joined session " + session.getSessionID() + "!")
+                            .send(message.getChannel());
                 }
             }
         }
@@ -491,9 +507,9 @@ public class GetDisciplinedModule implements Module {
                             .addField("Work Time", session.getSessionDuration() + " minute(s)")
                             .addField("Break Time", session.getSessionBreak() + " minute(s)");
                     if (!session.isOnBreak) {
-                        embed.addField("Work Time Remaining In Current Session", session.getSessionDuration() - session.getWorkTimeElapsed() + " minute(s)");
+                        embed.addField("Time Remaining Until Break", session.getSessionDuration() - session.getWorkTimeElapsed() + " minute(s)");
                     } else {
-                        embed.addField("Break Time Remaining In Current Session", session.getSessionBreak() - session.getBreakTimeElapsed() + " minute(s)");
+                        embed.addField("Time Remaining Until Break Ends", session.getSessionBreak() - session.getBreakTimeElapsed() + " minute(s)");
                     }
                     embed.addField("Sessions Remaining", session.getSessionsRemaining() + " session(s)");
                     new MessageBuilder()

@@ -49,6 +49,9 @@ public class AnonymousMessagingModule implements Module {
             userID = (userID + 1) % MAX_ID; // Linear probing to find an unused ID.
         }
         anonIDs.put(user, userID);
+        new MessageBuilder()
+                .setContent("You are now sending messages under the ID: `" + userID + "`.")
+                .send(user.asUser().get());
         return userID;
     }
 

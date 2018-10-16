@@ -33,7 +33,7 @@ public class YearAssignerModule implements Module {
         roles.put("Alumni", 451857408692715552L);
         roles.put("Prospective", 414579254211117057L);
         roles.put("Grad", 461818517600206868L);
-        roles.put("TS", 501285057248493568L);
+        roles.put("TS", 452344486098632722L);
         return ImmutableList.of(
                 new YearCommand()
         );

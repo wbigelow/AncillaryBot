@@ -129,8 +129,9 @@ public class YearAssignerModule implements Module {
                             });
                         }
                     }
-                    message.delete();
+                    sentMessage.delete();
                 });
+                message.delete();
             } catch (final InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }

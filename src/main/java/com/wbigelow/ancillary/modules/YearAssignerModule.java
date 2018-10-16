@@ -128,8 +128,8 @@ public class YearAssignerModule implements Module {
                                         .send(channel);
                             });
                         }
+                        sentMessage.delete();
                     }
-                    sentMessage.delete();
                 });
                 message.delete();
             } catch (final InterruptedException | ExecutionException | TimeoutException e) {

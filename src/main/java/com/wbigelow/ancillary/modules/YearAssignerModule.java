@@ -49,17 +49,13 @@ public class YearAssignerModule implements Module {
 
         @Override
         public String getDescription() {
-            return "Creates an embed for selecting a year. Requires Mod permissions.";
+            return "Creates an embed for selecting a year.";
         }
 
         @Override
         public PermissionLevel getRequiredPermissionLevel() {
-            return PermissionLevel.MOD;
+            return PermissionLevel.ANY;
         }
-
-        /*
-        Freshman, Sophomore, Junior, Senior, Grad, Alum, TS, and Prospective
-         */
 
         @Override
         public void execute(final Message message, final DiscordApi discordApi) {
@@ -91,7 +87,6 @@ public class YearAssignerModule implements Module {
                 sentMessage.addReactionAddListener(event -> {
                     final User user = event.getUser();
                     if (!user.isBot()) {
-                        event.removeReaction();
                         String year = "";
                         if (event.getEmoji().equalsEmoji(EmojiParser.parseToUnicode(":one:"))) {
                             year = "Freshmen";
@@ -134,6 +129,7 @@ public class YearAssignerModule implements Module {
                             });
                         }
                     }
+                    message.delete();
                 });
             } catch (final InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();

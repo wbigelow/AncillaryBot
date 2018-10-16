@@ -51,31 +51,13 @@ public class CommandManager {
             final List<Role> userRoles = user.getRoles(server);
             final Role modRole = server.getRoleById(MOD_ROLE_ID).get();
             final Role adminRole = server.getRoleById(ADMIN_ROLE_ID).get();
-            switch (command.getRequiredPermissionLevel()) {
-                case ANY:
-                    command.execute(message, discordApi);
-                    break;
-                case MOD:
-                    if (userRoles.contains(modRole) || userRoles.contains(adminRole)) {
-                        command.execute(message, discordApi);
-                    } else {
-                        new MessageBuilder()
-                                .setContent("You do not have permission to run this command.")
-                                .send(message.getChannel());
-                    }
-                    break;
-                case ADMIN:
-                    if (userRoles.contains(adminRole)) {
-                        command.execute(message, discordApi);
-                    } else {
-                        new MessageBuilder()
-                                .setContent("You do not have permission to run this command.")
-                                .send(message.getChannel());
-                    }
-                    break;
-                default:
-                    // No-Op
-                    break;
+            if (command.getRequiredPermissionLevel().getLevel() <=
+                    ((userRoles.contains(adminRole) ? 2 : 0) + (userRoles.contains(modRole) ? 1 : 0))) {
+                command.execute(message, discordApi);
+            } else {
+                new MessageBuilder()
+                        .setContent("You do not have permission to run this command.")
+                        .send(message.getChannel());
             }
         }
     }

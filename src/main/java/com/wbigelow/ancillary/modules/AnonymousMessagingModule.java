@@ -36,7 +36,8 @@ public class AnonymousMessagingModule implements Module {
         return ImmutableList.of(
                 new SendAnonymousMessageCommand(),
                 new GetNewIDCommand(),
-                new SendMessageToAnonymousUserCommand()
+                new SendMessageToAnonymousUserCommand(),
+                new BlacklistIDCommand()
         );
     }
 

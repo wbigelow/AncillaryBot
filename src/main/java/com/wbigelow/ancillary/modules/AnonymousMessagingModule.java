@@ -13,6 +13,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.MessageBuilder;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -28,6 +29,7 @@ public class AnonymousMessagingModule implements Module {
      */
     private static final int MAX_ID = 1000;
     private final BiMap<MessageAuthor, Integer> anonIDs = HashBiMap.create();
+    private final List<MessageAuthor> blacklist = new ArrayList<>();
 
     @Override
     public List<Command> getCommands() {
@@ -85,7 +87,7 @@ public class AnonymousMessagingModule implements Module {
             } else {
                 anonID = createAnonIDForUser(author);
             }
-            if (anonymousMessage.length() > 0 && channels.hasNext()) {
+            if (anonymousMessage.length() > 0 && channels.hasNext() && !blacklist.contains(author)) {
                 new MessageBuilder()
                         .append("`" + anonID + "` ")
                         .append(anonymousMessage)
@@ -164,6 +166,40 @@ public class AnonymousMessagingModule implements Module {
                     // No-Op
                 }
             }
+        }
+    }
+
+    final class BlacklistIDCommand implements Command {
+
+        @Override
+        public String getName() {
+            return "blacklist";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Blacklists a user from sending anon messages. Requires mod permissions.";
+        }
+
+        @Override
+        public PermissionLevel getRequiredPermissionLevel() {
+            return PermissionLevel.MOD;
+        }
+
+        @Override
+        public void execute(final Message message, final DiscordApi discordApi) {
+            try {
+                final int id = Integer.parseInt(message.getContent().split(" ", 2)[1]);
+                blacklist.add(anonIDs.inverse().get(id));
+                new MessageBuilder()
+                        .setContent("User blacklisted.")
+                        .send(message.getChannel());
+            } catch (final NumberFormatException e) {
+                new MessageBuilder()
+                        .setContent("ID must be an integer.")
+                        .send(message.getChannel());
+            }
+
         }
     }
 }

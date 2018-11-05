@@ -37,7 +37,8 @@ public class AnonymousMessagingModule implements Module {
                 new SendAnonymousMessageCommand(),
                 new GetNewIDCommand(),
                 new SendMessageToAnonymousUserCommand(),
-                new BlacklistIDCommand()
+                new BlacklistIDCommand(),
+                new SendRelationshipsAnonymousMessageCommand()
         );
     }
 
@@ -56,6 +57,28 @@ public class AnonymousMessagingModule implements Module {
                 .setContent("You are now sending messages under the ID: `" + userID + "`.")
                 .send(user.asUser().get());
         return userID;
+    }
+
+    private void sendAnonMessage(final Message message, final DiscordApi discordApi, final String channel) {
+        final Iterator<ServerTextChannel> channels = discordApi.getServerTextChannelsByName(channel).iterator();
+        final String content = message.getContent();
+        final String anonymousMessage = content.contains(" ") ? content.substring(content.indexOf(" ") + 1) : "";
+        final int anonID;
+        final MessageAuthor author = message.getAuthor();
+        if (anonIDs.containsKey(author)) {
+            anonID = anonIDs.get(message.getAuthor());
+        } else {
+            anonID = createAnonIDForUser(author);
+        }
+        if (anonymousMessage.length() > 0 && channels.hasNext() && !blacklist.contains(author)) {
+            new MessageBuilder()
+                    .append("`" + anonID + "` ")
+                    .append(anonymousMessage)
+                    .send(channels.next());
+        }
+        if (message.canYouDelete()) {
+            message.delete();
+        }
     }
 
     final class SendAnonymousMessageCommand implements Command {
@@ -78,25 +101,31 @@ public class AnonymousMessagingModule implements Module {
 
         @Override
         public void execute(final Message message, final DiscordApi discordApi) {
-            final Iterator<ServerTextChannel> channels = discordApi.getServerTextChannelsByName("anonymous").iterator();
-            final String content = message.getContent();
-            final String anonymousMessage = content.contains(" ") ? content.substring(content.indexOf(" ") + 1) : "";
-            final int anonID;
-            final MessageAuthor author = message.getAuthor();
-            if (anonIDs.containsKey(author)) {
-                anonID = anonIDs.get(message.getAuthor());
-            } else {
-                anonID = createAnonIDForUser(author);
-            }
-            if (anonymousMessage.length() > 0 && channels.hasNext() && !blacklist.contains(author)) {
-                new MessageBuilder()
-                        .append("`" + anonID + "` ")
-                        .append(anonymousMessage)
-                        .send(channels.next());
-            }
-            if (message.canYouDelete()) {
-                message.delete();
-            }
+            sendAnonMessage(message, discordApi, "anonymous");
+        }
+    }
+
+    final class SendRelationshipsAnonymousMessageCommand implements Command {
+
+        @Override
+        public String getName() {
+            return "relationships";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Sends an anonymous message to the #relationships channel under a random ID. "
+                    + "Anything after the command word will be sent.";
+        }
+
+        @Override
+        public PermissionLevel getRequiredPermissionLevel() {
+            return PermissionLevel.ANY;
+        }
+
+        @Override
+        public void execute(final Message message, final DiscordApi discordApi) {
+            sendAnonMessage(message, discordApi, "relationships");
         }
     }
 

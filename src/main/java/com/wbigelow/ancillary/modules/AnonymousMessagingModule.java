@@ -38,7 +38,8 @@ public class AnonymousMessagingModule implements Module {
                 new GetNewIDCommand(),
                 new SendMessageToAnonymousUserCommand(),
                 new BlacklistIDCommand(),
-                new SendRelationshipsAnonymousMessageCommand()
+                new SendRelationshipsAnonymousMessageCommand(),
+                new UnBlacklistIDCommand()
         );
     }
 
@@ -229,7 +230,39 @@ public class AnonymousMessagingModule implements Module {
                         .setContent("ID must be an integer.")
                         .send(message.getChannel());
             }
+        }
+    }
 
+    final class UnBlacklistIDCommand implements Command {
+
+        @Override
+        public String getName() {
+            return "unblacklist";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Removes a user from the blacklist. Requires mod permissions.";
+        }
+
+        @Override
+        public PermissionLevel getRequiredPermissionLevel() {
+            return PermissionLevel.MOD;
+        }
+
+        @Override
+        public void execute(final Message message, final DiscordApi discordApi) {
+            try {
+                final int id = Integer.parseInt(message.getContent().split(" ", 2)[1]);
+                blacklist.remove(anonIDs.inverse().get(id));
+                new MessageBuilder()
+                        .setContent("User unblacklisted.")
+                        .send(message.getChannel());
+            } catch (final NumberFormatException e) {
+                new MessageBuilder()
+                        .setContent("ID must be an integer.")
+                        .send(message.getChannel());
+            }
         }
     }
 }

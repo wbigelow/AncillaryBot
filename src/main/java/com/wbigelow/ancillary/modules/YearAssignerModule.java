@@ -44,12 +44,12 @@ public class YearAssignerModule implements Module {
 
         @Override
         public String getName() {
-            return "year";
+            return "setyear";
         }
 
         @Override
         public String getDescription() {
-            return "Creates an embed for selecting a year.";
+            return "Allows a user to set their year.";
         }
 
         @Override

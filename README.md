@@ -28,4 +28,4 @@ token, which you can learn how to create by doing a quick google search.
 ### Commands
 Ancillary's trigger character is `>`. You can use `>help` to see all the available commands, your commands will also appear. 
 ### Questions?
-You can add me on discord Snowcrash#4558 if you have any questions. I can also take feature requests.
+You can add me on discord Leet#4558 if you have any questions. I can also take feature requests.

@@ -1,5 +1,3 @@
-// This module was made by OwenTheGoat (alias +updog)
-
 package com.wbigelow.ancillary.modules;
 
 import com.google.common.collect.ImmutableList;
@@ -13,10 +11,12 @@ import org.javacord.api.entity.message.MessageBuilder;
 
 import java.util.List;
 
+/**
+ * @author OwenTheGoat (alias +updog)
+ */
 @NoArgsConstructor
 public class LeetModule implements Module {
 
-    // Add to the commands
     @Override
     public List<Command> getCommands() {
         return ImmutableList.of(
@@ -34,7 +34,7 @@ public class LeetModule implements Module {
 
         @Override
         public String getDescription() {
-            return "Replies \"leet -> 1337\".";
+            return "Changes all text to leetspeak.";
         }
 
         @Override
@@ -44,29 +44,31 @@ public class LeetModule implements Module {
 
         private String translateLeet(final Message message) {
             final String content = message.getContent();
-            String leet = "";
-            if (content.length() < 6) {
+            final StringBuilder response = new StringBuilder();
+            if (content.length() < getName().length() + 2) {
                 return "t00 sh0r7";
             }
-            // Start at 6 for ">leet _______"
+            // Start at 6 for command name
             for (int i = 5; i < content.length(); i++) {
-                char c = Character.toLowerCase(content.charAt(i));
+                final char c = Character.toLowerCase(content.charAt(i));
                 switch (c) {
-                    case 'o': leet += "0";
+                    case 'o': response.append("0");
                         break;
-                    case 'l': leet += "1";
+                    case 'l': response.append("1");
                         break;
-                    case 'e': leet += "3";
+                    case 'e': response.append("3");
                         break;
-                    case 'a': leet += "4";
+                    case 'a': response.append("4");
                         break;
-                    case '2': leet += "Z";
+                    case '2': response.append("Z");
                         break;
-                    default: leet += c;
+                    case 't': response.append("7");
+                        break;
+                    default: response.append(c);
                         break;
                 }
             }
-            return leet;
+            return response.toString();
         }
 
         @Override

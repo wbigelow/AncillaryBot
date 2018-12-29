@@ -48,7 +48,7 @@ public class AnonymousMessagingModule implements Module {
      */
     private int createAnonIDForUser(final MessageAuthor user) {
         int userID;
-        if (anonIDs.keySet().size() > MAX_ID) { // We've filled up on IDs presumably
+        if (anonIDs.keySet().size() >= MAX_ID) { // We've filled up on IDs presumably
             // Just make the ID the lowest available ID
             userID = IntStream
                     .range(0, anonIDs.keySet().size())

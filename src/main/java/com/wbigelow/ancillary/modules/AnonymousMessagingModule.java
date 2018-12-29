@@ -50,10 +50,17 @@ public class AnonymousMessagingModule implements Module {
      */
     private int createAnonIDForUser(final MessageAuthor user) {
         int userID = RANDOM.nextInt(MAX_ID);
-        while (anonIDs.inverse().containsKey(userID)) {
-            userID = (userID + 1) % MAX_ID; // Linear probing to find an unused ID.
+        
+        if (anonIDs.keySet().size() >= MAX_ID) { // All IDs are presumably taken
+            new MessageBuilder()
+                    .setContent("Due to high volume, your current ID has been taken by another user.")
+                    .send(anonIDs.inverse().get(userID).asUser().get());
+        } else {
+            while (anonIDs.inverse().containsKey(userID)) {
+                userID = (userID + 1) % MAX_ID; // Linear probing to find an unused ID.
+            }
         }
-        anonIDs.put(user, userID);
+        anonIDs.forcePut(user, userID);
         new MessageBuilder()
                 .setContent("You are now sending messages under the ID: `" + userID + "`.")
                 .send(user.asUser().get());

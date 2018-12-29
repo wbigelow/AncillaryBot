@@ -13,10 +13,8 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.MessageBuilder;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.*;
 
 @NoArgsConstructor
 public class AnonymousMessagingModule implements Module {
@@ -49,18 +47,22 @@ public class AnonymousMessagingModule implements Module {
      * @return the created ID.
      */
     private int createAnonIDForUser(final MessageAuthor user) {
-        int userID = RANDOM.nextInt(MAX_ID);
-        
-        if (anonIDs.keySet().size() >= MAX_ID) { // All IDs are presumably taken
-            new MessageBuilder()
-                    .setContent("Due to high volume, your current ID has been taken by another user.")
-                    .send(anonIDs.inverse().get(userID).asUser().get());
-        } else {
+        int userID;
+        if (anonIDs.keySet().size() > MAX_ID) { // We've filled up on IDs presumably
+            // Just make the ID the lowest available ID
+            userID = IntStream
+                    .range(0, anonIDs.keySet().size())
+                    .parallel()
+                    .filter(x -> !anonIDs.values().contains(x))
+                    .min()
+                    .orElse(anonIDs.keySet().size());
+        } else { // Otherwise give them a nice random one in our defined range
+            userID = RANDOM.nextInt(MAX_ID);
             while (anonIDs.inverse().containsKey(userID)) {
                 userID = (userID + 1) % MAX_ID; // Linear probing to find an unused ID.
             }
         }
-        anonIDs.forcePut(user, userID);
+        anonIDs.put(user, userID);
         new MessageBuilder()
                 .setContent("You are now sending messages under the ID: `" + userID + "`.")
                 .send(user.asUser().get());

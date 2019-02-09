@@ -17,9 +17,9 @@ import java.util.Map;
  * Manages the commands. Only modification to the file should be the SERVER_ID, MOD_ROLE_ID, and ADMIN_ROLE_ID values.
  */
 public class CommandManager {
-    private static final long SERVER_ID = 0L; // REPLACE 0 WITH YOUR SERVER ID
-    private static final long MOD_ROLE_ID = 0L; // REPLACE 0 WITH THE MOD ROLE ON YOUR SERVER (OR ADMIN IF NO MOD).
-    private static final long ADMIN_ROLE_ID = 0L; // REPLACE 0 WITH THE ADMIN ROLE ON YOUR SERVER.
+    private static final long SERVER_ID = 362689877269020684L;
+    private static final long MOD_ROLE_ID = 363053253509775371L;
+    private static final long ADMIN_ROLE_ID = 459560475034648616L;
     /**
      * Maps command trigger words to the command.
      */
@@ -51,23 +51,13 @@ public class CommandManager {
             final List<Role> userRoles = user.getRoles(server);
             final Role modRole = server.getRoleById(MOD_ROLE_ID).get();
             final Role adminRole = server.getRoleById(ADMIN_ROLE_ID).get();
-            switch (command.getRequiredPermissionLevel()) {
-                case ANY:
-                    command.execute(message, discordApi);
-                    break;
-                case MOD:
-                    if (userRoles.contains(modRole) || userRoles.contains(adminRole)) {
-                        command.execute(message, discordApi);
-                    }
-                    break;
-                case ADMIN:
-                    if (userRoles.contains(adminRole)) {
-                        command.execute(message, discordApi);
-                    }
-                    break;
-                default:
-                    // No-Op
-                    break;
+            if (command.getRequiredPermissionLevel().getLevel() <=
+                    ((userRoles.contains(adminRole) ? 2 : 0) + (userRoles.contains(modRole) ? 1 : 0))) {
+                command.execute(message, discordApi);
+            } else {
+                new MessageBuilder()
+                        .setContent("You do not have permission to run this command.")
+                        .send(message.getChannel());
             }
         }
     }
@@ -84,7 +74,7 @@ public class CommandManager {
 
         @Override
         public String getDescription() {
-            return "Messages the user with all the commands ancillary has.";
+            return "Messages the user with all the commands the bot has.";
         }
 
         @Override
@@ -95,7 +85,7 @@ public class CommandManager {
         @Override
         public void execute(final Message message, final DiscordApi discordApi) {
             final EmbedBuilder embedBuilder = new EmbedBuilder()
-                    .setTitle("Here are all the commands Ancillary can do.")
+                    .setTitle("Here are all the commands the bot can do.")
                     .setColor(Color.GREEN);
             for (final Command command : commands.values()) {
                 embedBuilder.addField(command.getName(), command.getDescription());

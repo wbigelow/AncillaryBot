@@ -18,6 +18,7 @@ dependencies {
     compile 'org.javacord:javacord:3.0.0'
     compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
     compile 'com.vdurmont:emoji-java:4.0.0'
+    compile group:'org.xerial', name:'sqlite-jdbc', version: '3.25.2'
 }
 
 lombok {

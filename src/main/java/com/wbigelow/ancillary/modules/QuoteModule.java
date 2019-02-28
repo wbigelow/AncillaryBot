@@ -28,6 +28,7 @@ public class QuoteModule implements Module {
     private final int QUOTE_LENGTH = 7;
     private final int ADD_QUOTE_LENGTH = 10;
     private final int DEL_QUOTE_LENGTH = 10;
+    private final String iOS_QUOTE_REGEX = "“|”";
 
     
     public QuoteModule() {
@@ -137,7 +138,8 @@ public class QuoteModule implements Module {
         }
 
         private String addQuote(final Message message) {
-            final String[] content = message.getContent().substring(ADD_QUOTE_LENGTH).split("\""); // remove command
+            final String[] content = message.getContent().substring(ADD_QUOTE_LENGTH)
+                .replaceAll(iOS_QUOTE_REGEX, "\"").split("\""); // remove command
             if(content.length < 3) {
                 return "Please use the correct format: >addquote \"quote\" user";
             }

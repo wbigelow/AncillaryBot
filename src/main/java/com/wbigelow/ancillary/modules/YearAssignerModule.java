@@ -1,6 +1,5 @@
 package com.wbigelow.ancillary.modules;
 
-import com.google.common.collect.ImmutableList;
 import com.vdurmont.emoji.EmojiParser;
 import com.wbigelow.ancillary.Command;
 import com.wbigelow.ancillary.Module;
@@ -13,6 +12,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.user.User;
 
 import java.awt.*;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +34,10 @@ public class YearAssignerModule implements Module {
         roles.put("Prospective", 414579254211117057L);
         roles.put("Grad", 461818517600206868L);
         roles.put("TS", 452344486098632722L);
-        return ImmutableList.of(
-                new YearCommand()
-        );
+//        return ImmutableList.of(
+//                new YearCommand()
+//        );
+        return Collections.emptyList();
     }
 
     @NoArgsConstructor

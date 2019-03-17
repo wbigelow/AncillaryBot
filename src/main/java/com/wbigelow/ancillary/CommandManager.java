@@ -17,9 +17,8 @@ import java.util.Map;
  * Manages the commands. Only modification to the file should be the SERVER_ID, MOD_ROLE_ID, and ADMIN_ROLE_ID values.
  */
 public class CommandManager {
-    private static final long SERVER_ID = 362689877269020684L;
-    private static final long MOD_ROLE_ID = 363053253509775371L;
-    private static final long ADMIN_ROLE_ID = 459560475034648616L;
+    private static final long SERVER_ID = 546259676531130368L;
+
     /**
      * Maps command trigger words to the command.
      */
@@ -49,9 +48,9 @@ public class CommandManager {
             final Command command = commands.get(commandWord.toLowerCase());
             final Server server = discordApi.getServerById(SERVER_ID).get();
             final List<Role> userRoles = user.getRoles(server);
-            final Role modRole = server.getRoleById(MOD_ROLE_ID).get();
-            final Role adminRole = server.getRoleById(ADMIN_ROLE_ID).get();
-            if (command.getRequiredPermissionLevel().getLevel() <=
+            final Role modRole = server.getRolesByName("Mods").get(0);
+            final Role adminRole = server.getRolesByName("Admin").get(0);
+            if (user.isBotOwner() || command.getRequiredPermissionLevel().getLevel() <=
                     ((userRoles.contains(adminRole) ? 2 : 0) + (userRoles.contains(modRole) ? 1 : 0))) {
                 command.execute(message, discordApi);
             } else {

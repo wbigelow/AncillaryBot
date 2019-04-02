@@ -37,7 +37,7 @@ public class AnonymousMessagingModule implements Module {
                 new SendMessageToAnonymousUserCommand(),
                 new BlacklistIDCommand(),
                 new SendRelationshipsAnonymousMessageCommand(),
-                new SendSeriousAnonymousMessageCommand()
+                new SendSeriousAnonymousMessageCommand(),
                 new UnBlacklistIDCommand()
         );
     }

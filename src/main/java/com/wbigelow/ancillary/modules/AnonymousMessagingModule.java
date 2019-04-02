@@ -37,6 +37,7 @@ public class AnonymousMessagingModule implements Module {
                 new SendMessageToAnonymousUserCommand(),
                 new BlacklistIDCommand(),
                 new SendRelationshipsAnonymousMessageCommand(),
+                new SendSeriousAnonymousMessageCommand()
                 new UnBlacklistIDCommand()
         );
     }
@@ -124,6 +125,30 @@ public class AnonymousMessagingModule implements Module {
         }
     }
 
+    final class SendSeriousAnonymousMessageCommand implements Command {
+
+        @Override
+        public String getName() {
+            return "serious";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Sends an anonymous message to the #serious channel under a random ID. "
+                    + "Anything after the command word will be sent.";
+        }
+
+        @Override
+        public PermissionLevel getRequiredPermissionLevel() {
+            return PermissionLevel.ANY;
+        }
+
+        @Override
+        public void execute(final Message message, final DiscordApi discordApi) {
+            sendAnonMessage(message, discordApi, "serious");
+        }
+    }
+    
     final class SendRelationshipsAnonymousMessageCommand implements Command {
 
         @Override

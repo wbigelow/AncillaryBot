@@ -6,8 +6,11 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Scanner;
 import java.util.Set;
 
 /**
@@ -33,7 +36,13 @@ public class AncillaryEntry {
             e.printStackTrace();
         }
         commandManager = new CommandManager(commandListBuilder.build());
-        final String token = args[0];
+        final String token;
+        try {
+            token = new Scanner(new File("token.txt")).nextLine();
+        } catch (final FileNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
         final DiscordApi discordApi = new DiscordApiBuilder().setToken(token).login().join();
         discordApi.addMessageCreateListener(new MessageCreateListenerImpl(commandManager, discordApi));
         discordApi.updateActivity(ActivityType.PLAYING, ">help");

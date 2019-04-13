@@ -5,3 +5,5 @@ gradle/
 gradlew
 gradlew.bat
 out/
+.env
+bin/

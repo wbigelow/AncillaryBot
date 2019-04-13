@@ -37,11 +37,16 @@ public class AncillaryEntry {
         }
         commandManager = new CommandManager(commandListBuilder.build());
         final String token;
-        try {
-            token = new Scanner(new File("token.txt")).nextLine();
-        } catch (final FileNotFoundException e) {
-            e.printStackTrace();
-            return;
+        if (System.getenv("DISCORD_TOKEN") != null) {
+            // Fetch the token from the environ over the file if the environ is set.
+            token = System.getenv("DISCORD_TOKEN");
+        } else {
+            try {
+                token = new Scanner(new File("token.txt")).nextLine();
+            } catch (final FileNotFoundException e) {
+                e.printStackTrace();
+                return;
+            }
         }
         final DiscordApi discordApi = new DiscordApiBuilder().setToken(token).login().join();
         discordApi.addMessageCreateListener(new MessageCreateListenerImpl(commandManager, discordApi));
